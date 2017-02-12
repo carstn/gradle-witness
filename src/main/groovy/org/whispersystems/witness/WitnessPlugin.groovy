@@ -4,6 +4,7 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.logging.Logger
 
 import java.security.MessageDigest
 
@@ -24,6 +25,7 @@ class WitnessPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.extensions.create("dependencyVerification", WitnessPluginExtension)
         project.afterEvaluate {
+            Logger gradleLog = project.getLogger()
             project.dependencyVerification.verify.each {
                 assertion ->
                     List  parts  = assertion.tokenize(":")
@@ -35,7 +37,7 @@ class WitnessPlugin implements Plugin<Project> {
                         return it.name.equals(name) && it.moduleVersion.id.group.equals(group)
                     }
 
-                    println "Verifying " + group + ":" + name
+                    gradleLog.info("Verifying " + group + ":" + name)
 
                     if (dependency == null) {
                         throw new InvalidUserDataException("No dependency for integrity assertion found: " + group + ":" + name)
